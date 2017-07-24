@@ -208,8 +208,9 @@ class OutputImage
      */
     public function isWebPSupport(): bool
     {
-        return $this->outputImageExtension == self::EXT_WEBP
-            || (in_array(self::WEBP_MIME_TYPE, Request::createFromGlobals()->getAcceptableContentTypes()));
+//        return $this->outputImageExtension == self::EXT_WEBP
+//            || (in_array(self::WEBP_MIME_TYPE, Request::createFromGlobals()->getAcceptableContentTypes()));
+        return false; // WebP is fully disabled because it seems to give wrong results for the extract function.
     }
 
     /**

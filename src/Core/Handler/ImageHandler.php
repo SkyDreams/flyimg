@@ -145,7 +145,6 @@ class ImageHandler
      */
     protected function extractProcess(OutputImage $outputImage): void
     {
-
         $extract      = $outputImage->extract('extract');
         $topLeftX     = $outputImage->extract('extract-top-x');
         $topLeftY     = $outputImage->extract('extract-top-y');

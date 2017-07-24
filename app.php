@@ -62,6 +62,9 @@ switch ($app['params']['storage_system']) {
     case 's3':
         $app->register(new \Core\StorageProvider\S3StorageProvider());
         break;
+    case 'skydreams':
+        $app->register(new \Core\StorageProvider\SkydreamsStorageProvider());
+        break;
     case 'local':
     default:
         $app->register(new \Core\StorageProvider\LocalStorageProvider());

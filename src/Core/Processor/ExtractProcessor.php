@@ -30,7 +30,7 @@ class ExtractProcessor extends Processor
 
         $cropCmdStr =
             self::IM_CONVERT_COMMAND.
-            " '{$inputImage->getSourceImagePath()}' -crop {$geometryW}'x'{$geometryH}'+'{$topLeftX}'+'{$topLeftY} ".
+            " '{$inputImage->getSourceImagePath()}' -crop '{$geometryW}'x'{$geometryH}'+'{$topLeftX}'+'{$topLeftY}' ".
             $inputImage->getSourceImagePath();
         $this->execute($cropCmdStr);
     }
