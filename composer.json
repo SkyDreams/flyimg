@@ -1,5 +1,5 @@
 {
-  "name": "flyimg/flyimg",
+  "name": "skydreams/flyimg",
   "description": "Server image resizing and cropping on the fly base on ImageMagick+MozJPEG",
   "type": "project",
   "keywords": [
