@@ -1,6 +1,6 @@
 <?php
 
-namespace Core\Entity;
+namespace Core\Entity\Image;
 
 use Core\Exception\InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Request;
@@ -63,9 +63,9 @@ class OutputImage
      *
      * @return string
      */
-    public function extract(string $key): string
+    public function extractKey(string $key): string
     {
-        return $this->inputImage->extract($key);
+        return $this->inputImage->extractKey($key);
     }
 
     /**
@@ -100,6 +100,9 @@ class OutputImage
         $this->commandString = $commandStr;
     }
 
+    /**
+     * @return string
+     */
     public function getCommandString(): string
     {
         return $this->commandString;
@@ -116,7 +119,7 @@ class OutputImage
     /**
      * @param string $outputImageContent
      */
-    public function setOutputImageContent(string $outputImageContent)
+    public function attachOutputContent(string $outputImageContent)
     {
         $this->outputImageContent = $outputImageContent;
     }
@@ -140,31 +143,18 @@ class OutputImage
     }
 
     /**
-     * Remove all generated files
-     */
-    public function cleanupFiles()
-    {
-        $this->removeOutputImage();
-
-        $fullPath = UPLOAD_DIR.$this->getOutputImageName();
-        if (file_exists($fullPath)) {
-            unlink($fullPath);
-        }
-
-        $this->getInputImage()->removeInputImage();
-    }
-
-    /**
      * Generate files name + files path
      */
     protected function generateFilesName()
     {
-        $hashedOptions = $this->inputImage->getOptions();
-        unset($hashedOptions['refresh']);
-        $this->outputImageName = md5(implode('.', $hashedOptions).$this->inputImage->getSourceImageUrl());
+        $hashedOptions = clone $this->inputImage->optionsBag();
+        $hashedOptions->remove('refresh');
+        $this->outputImageName = md5(
+            implode('.', $hashedOptions->asArray()).$this->inputImage->sourceImageUrl()
+        );
         $this->outputImagePath = TMP_DIR.$this->outputImageName;
 
-        if ($this->inputImage->getOptions()['refresh']) {
+        if ($this->inputImage->optionsBag()->get('refresh')) {
             $this->outputImagePath .= uniqid("-", true);
         }
     }
@@ -174,7 +164,7 @@ class OutputImage
      */
     protected function generateFileExtension()
     {
-        $this->outputImageExtension = $this->resolveOutputImageExtension($this->extract('output'));
+        $this->outputImageExtension = $this->resolveOutputImageExtension($this->extractKey('output'));
         $fileExtension = '.'.$this->outputImageExtension;
         $this->outputImagePath .= $fileExtension;
         $this->outputImageName .= $fileExtension;
@@ -182,17 +172,20 @@ class OutputImage
 
     /**
      * Given a certain output expected this method will resolve the extension
-     * @param  string $requestedOutput      file type extension, or behaviour like `auto` or `input`
-     * @return string                       The extension to generate given all the configs and conditions present.
+     *
+     * @param  string $requestedOutput file type extension, or behaviour like `auto` or `input`
+     *
+     * @return string The extension to generate given all the configs and conditions present.
+     * @throws InvalidArgumentException
      */
     protected function resolveOutputImageExtension(string $requestedOutput): string
     {
         $resolvedExtension = self::EXT_JPG;
 
         if ($requestedOutput == self::EXT_INPUT) {
-            $resolvedExtension = $this->getInputImageExtension();
+            $resolvedExtension = $this->inputImageExtension();
         } elseif ($requestedOutput == self::EXT_AUTO) {
-            $resolvedExtension = $this->getAutoExtension();
+            $resolvedExtension = $this->autoExtension();
         } else {
             if (!in_array($requestedOutput, $this->allowedOutExtensions)) {
                 // Maybe trow exception only when in debug mode ?
@@ -200,8 +193,10 @@ class OutputImage
             }
             $resolvedExtension = $requestedOutput;
         }
+
         return $resolvedExtension;
     }
+
     /**
      * This method defines what extension / format to use in the output image, using the following criteria:
      *   1. Optimal image format for the requesting browser
@@ -210,40 +205,44 @@ class OutputImage
      *
      * @return string One image extension
      */
-    protected function getAutoExtension(): string
+    protected function autoExtension(): string
     {
         // for now AUTO means webP, or ...
         if ($this->isWebPBrowserSupported()) {
             return self::EXT_WEBP;
         }
 
-        // fall back to input extension, which fallsback to jpg
-        return $this->getInputImageExtension();
+        // fall back to input extension, which falls back to jpg
+        return $this->inputImageExtension();
     }
 
     /**
      * get the extension of the input image asociated with this entity
      * @return string   defaults to `jpg`
      */
-    protected function getInputImageExtension(): string
+    protected function inputImageExtension(): string
     {
-        $resolvedExtension = $this->getExtensionByMimeType($this->inputImage->getSourceImageMimeType());
+        $resolvedExtension = $this->extensionByMimeType($this->inputImage->sourceImageMimeType());
+
         return $resolvedExtension ? $resolvedExtension : self::EXT_JPG;
     }
 
     /**
      * given a mime-type this returns the extension associated to it
+     *
      * @param  string $mimeType mime-type
+     *
      * @return string           extension OR empty string
      */
-    protected function getExtensionByMimeType(string $mimeType): string
+    protected function extensionByMimeType(string $mimeType): string
     {
         $mimeToExtensions = [
             self::PNG_MIME_TYPE => self::EXT_PNG,
             self::WEBP_MIME_TYPE => self::EXT_WEBP,
             self::JPEG_MIME_TYPE => self::EXT_JPG,
-            self::GIF_MIME_TYPE => self::EXT_GIF
+            self::GIF_MIME_TYPE => self::EXT_GIF,
         ];
+
         return array_key_exists($mimeType, $mimeToExtensions) ? $mimeToExtensions[$mimeType] : '';
     }
 
@@ -281,7 +280,7 @@ class OutputImage
      */
     public function isInputGif(): bool
     {
-        return $this->inputImage->getSourceImageMimeType() == self::GIF_MIME_TYPE;
+        return $this->inputImage->sourceImageMimeType() == self::GIF_MIME_TYPE;
     }
 
     /**
@@ -289,7 +288,7 @@ class OutputImage
      */
     public function isOutputMozJpeg(): bool
     {
-        return $this->extract('mozjpeg') == 1 &&
+        return $this->extractKey('mozjpeg') == 1 &&
             (!$this->isOutputPng() || $this->outputImageExtension == self::EXT_JPG) &&
             (!$this->isOutputGif());
     }

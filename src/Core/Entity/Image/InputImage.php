@@ -1,13 +1,15 @@
 <?php
 
-namespace Core\Entity;
+namespace Core\Entity\Image;
 
+use Core\Entity\OptionsBag;
 use Core\Exception\ReadFileException;
+use Core\Entity\ImageMetaInfo;
 
 class InputImage
 {
-    /** @var array */
-    protected $options = [];
+    /** @var OptionsBag */
+    protected $optionsBag;
 
     /** @var string */
     protected $sourceImageUrl;
@@ -18,20 +20,27 @@ class InputImage
     /** @var string */
     protected $sourceImageMimeType;
 
+    /** @var ImageMetaInfo */
+    protected $sourceImageInfo;
+
     /**
      * OutputImage constructor.
      *
-     * @param array  $options
-     * @param string $sourceImageUrl
+     * @param OptionsBag $optionsBag
+     * @param string     $sourceImageUrl
      */
-    public function __construct(array $options, string $sourceImageUrl)
+    public function __construct(OptionsBag $optionsBag, string $sourceImageUrl)
     {
-        $this->options = $options;
+        $this->optionsBag = $optionsBag;
         $this->sourceImageUrl = $sourceImageUrl;
 
-        $this->sourceImagePath = TMP_DIR.'original-'.(md5($options['face-crop-position'].$this->sourceImageUrl));
+        $this->sourceImagePath = TMP_DIR.'original-'.
+            (md5(
+                $optionsBag->get('face-crop-position').
+                $this->sourceImageUrl
+            ));
         $this->saveToTemporaryFile();
-        $this->sourceImageMimeType = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $this->sourceImagePath);
+        $this->sourceImageInfo = new ImageMetaInfo($this->sourceImagePath);
     }
 
     /**
@@ -41,7 +50,7 @@ class InputImage
      */
     protected function saveToTemporaryFile()
     {
-        if (file_exists($this->sourceImagePath) && !$this->options['refresh']) {
+        if (file_exists($this->sourceImagePath) && !$this->optionsBag->get('refresh')) {
             return;
         }
 
@@ -71,8 +80,8 @@ class InputImage
      */
     public function removeInputImage()
     {
-        if (file_exists($this->getSourceImagePath())) {
-            unlink($this->getSourceImagePath());
+        if (file_exists($this->sourceImagePath())) {
+            unlink($this->sourceImagePath());
         }
     }
 
@@ -81,29 +90,29 @@ class InputImage
      *
      * @return string
      */
-    public function extract(string $key): string
+    public function extractKey(string $key): string
     {
         $value = '';
-        if (isset($this->options[$key])) {
-            $value = $this->options[$key];
-            unset($this->options[$key]);
+        if ($this->optionsBag->has($key)) {
+            $value = $this->optionsBag->get($key);
+            $this->optionsBag->remove($key);
         }
 
-        return $value;
+        return is_null($value) ? '' : $value;
     }
 
     /**
-     * @return array
+     * @return OptionsBag
      */
-    public function getOptions(): array
+    public function optionsBag(): OptionsBag
     {
-        return $this->options;
+        return $this->optionsBag;
     }
 
     /**
      * @return string
      */
-    public function getSourceImageUrl(): string
+    public function sourceImageUrl(): string
     {
         return $this->sourceImageUrl;
     }
@@ -111,7 +120,7 @@ class InputImage
     /**
      * @return string
      */
-    public function getSourceImagePath(): string
+    public function sourceImagePath(): string
     {
         return $this->sourceImagePath;
     }
@@ -119,8 +128,18 @@ class InputImage
     /**
      * @return string
      */
-    public function getSourceImageMimeType(): string
+    public function sourceImageMimeType(): string
     {
+        if (isset($this->sourceImageMimeType)) {
+            return $this->sourceImageMimeType;
+        }
+
+        $this->sourceImageMimeType = $this->sourceImageInfo->mimeType();
         return $this->sourceImageMimeType;
+    }
+
+    public function sourceImageInfo()
+    {
+        return $this->sourceImageInfo;
     }
 }
