@@ -299,6 +299,7 @@ class OutputImage
      */
     public function isWebPBrowserSupported(): bool
     {
-        return in_array(self::WEBP_MIME_TYPE, Request::createFromGlobals()->getAcceptableContentTypes());
+        return false; // We don't support webP right now because it is complicated with caching and cropping
+//        return in_array(self::WEBP_MIME_TYPE, Request::createFromGlobals()->getAcceptableContentTypes());
     }
 }
