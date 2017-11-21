@@ -17,6 +17,8 @@ RUN apt-get update && apt-get install -y \
 ADD ./crontab /etc/cron.d/docker
 ADD ./remove-tmp-files.sh /var/www/html/remove-tmp-files.sh
 
+RUN composer update
+
 EXPOSE 80
 
 CMD /usr/bin/supervisord
