@@ -2,9 +2,6 @@ FROM flyimg/docker-app
 
 ENV TZ=Europe/Amsterdam
 
-# Remove the list of packages of apt as it can get large in size
-RUN rm -rf /var/lib/apt/lists/*
-
 COPY .        /var/www/html
 
 #add www-data + mdkdir var folder
