@@ -50,12 +50,16 @@ class OutputImage
      * OutputImage constructor.
      *
      * @param InputImage $inputImage
+     *
+     * @throws InvalidArgumentException
      */
     public function __construct(InputImage $inputImage)
     {
         $this->inputImage = $inputImage;
         $this->generateFilesName();
-        $this->generateFileExtension();
+        $this->outputImageExtension = $this->generateFileExtension();
+        $this->outputImagePath .= '.'.$this->outputImageExtension;
+        $this->outputImageName .= '.'.$this->outputImageExtension;
     }
 
     /**
@@ -164,67 +168,21 @@ class OutputImage
      */
     protected function generateFileExtension()
     {
-        $this->outputImageExtension = $this->resolveOutputImageExtension($this->extractKey('output'));
-        $fileExtension = '.'.$this->outputImageExtension;
-        $this->outputImagePath .= $fileExtension;
-        $this->outputImageName .= $fileExtension;
-    }
+        $requestedOutput = $this->extractKey('output');
 
-    /**
-     * Given a certain output expected this method will resolve the extension
-     *
-     * @param  string $requestedOutput file type extension, or behaviour like `auto` or `input`
-     *
-     * @return string The extension to generate given all the configs and conditions present.
-     * @throws InvalidArgumentException
-     */
-    protected function resolveOutputImageExtension(string $requestedOutput): string
-    {
-        $resolvedExtension = self::EXT_JPG;
-
-        if ($requestedOutput == self::EXT_INPUT) {
-            $resolvedExtension = $this->inputImageExtension();
-        } elseif ($requestedOutput == self::EXT_AUTO) {
-            $resolvedExtension = $this->autoExtension();
-        } else {
-            if (!in_array($requestedOutput, $this->allowedOutExtensions)) {
-                // Maybe trow exception only when in debug mode ?
-                throw new InvalidArgumentException("Invalid file output requested : ".$requestedOutput);
-            }
-            $resolvedExtension = $requestedOutput;
-        }
-
-        return $resolvedExtension;
-    }
-
-    /**
-     * This method defines what extension / format to use in the output image, using the following criteria:
-     *   1. Optimal image format for the requesting browser
-     *   2. Source image format
-     *   3. JPG
-     *
-     * @return string One image extension
-     */
-    protected function autoExtension(): string
-    {
-        // for now AUTO means webP, or ...
-        if ($this->isWebPBrowserSupported()) {
+        if ($requestedOutput == self::EXT_AUTO && $this->isWebPBrowserSupported()) {
             return self::EXT_WEBP;
         }
 
-        // fall back to input extension, which falls back to jpg
-        return $this->inputImageExtension();
-    }
+        if ($requestedOutput == self::EXT_INPUT || $requestedOutput == self::EXT_AUTO) {
+            return $this->extensionByMimeType($this->inputImage->sourceImageMimeType());
+        }
 
-    /**
-     * get the extension of the input image asociated with this entity
-     * @return string   defaults to `jpg`
-     */
-    protected function inputImageExtension(): string
-    {
-        $resolvedExtension = $this->extensionByMimeType($this->inputImage->sourceImageMimeType());
+        if (!in_array($requestedOutput, $this->allowedOutExtensions)) {
+            throw new InvalidArgumentException("Invalid file output requested : ".$requestedOutput);
+        }
 
-        return $resolvedExtension ? $resolvedExtension : self::EXT_JPG;
+        return $requestedOutput;
     }
 
     /**
@@ -232,7 +190,7 @@ class OutputImage
      *
      * @param  string $mimeType mime-type
      *
-     * @return string           extension OR empty string
+     * @return string extension OR jpeg as default
      */
     protected function extensionByMimeType(string $mimeType): string
     {
@@ -243,7 +201,7 @@ class OutputImage
             self::GIF_MIME_TYPE => self::EXT_GIF,
         ];
 
-        return array_key_exists($mimeType, $mimeToExtensions) ? $mimeToExtensions[$mimeType] : '';
+        return array_key_exists($mimeType, $mimeToExtensions) ? $mimeToExtensions[$mimeType] : self::EXT_JPG;
     }
 
     /**

@@ -29,21 +29,21 @@ You pass the image URL and a set of keys with options, like size or compression.
 ```
 # Basic Usage Examples
 ## Get an image to fill exact dimensions
-* Image: `https://m0.cl/t/resize-test_1920.jpg` 
+* Image: `http://medula.cl/t/resize-test_1920.jpg` 
 * Width: 300
 * Height: 250
 * Crop if necesary: `c_1`
 
-https://oi.flyimg.io/upload/w_300,h_250,c_1/https://m0.cl/t/resize-test_1920.jpg
+https://oi.flyimg.io/upload/w_300,h_250,c_1/http://medula.cl/t/resize-test_1920.jpg
 
-![lago_ranco](https://oi.flyimg.io/upload/w_300,h_250,c_1/https://m0.cl/t/resize-test_1920.jpg)
+![lago_ranco](https://oi.flyimg.io/upload/w_300,h_250,c_1/http://medula.cl/t/resize-test_1920.jpg)
 
 This will serve the image.
 
 ## Get the path to the generated image instead of serving it
 Change the first part of the path from `upload` to `path`, like so:
 
-https://oi.flyimg.io/path/w_300,h_250,c_1/https://m0.cl/t/resize-test_1920.jpg will output in the body of the response:
+https://oi.flyimg.io/path/w_300,h_250,c_1/http://medula.cl/t/resize-test_1920.jpg will output in the body of the response:
 
 
 ```
@@ -51,36 +51,36 @@ http://localhost:8080/uploads/752d2124eef87b3112779618c96468da.jpg
 ```
 
 ## Get an image to fit maximum dimensions
-* Image: `https://m0.cl/t/resize-test_1920.jpg` 
+* Image: `http://medula.cl/t/resize-test_1920.jpg` 
 * Width: 300
 * Height: 250
 * Note that we ommit the crop parameter
 
-https://oi.flyimg.io/upload/w_300,h_250/https://m0.cl/t/resize-test_1920.jpg
+https://oi.flyimg.io/upload/w_300,h_250/http://medula.cl/t/resize-test_1920.jpg
 
-![lago_ranco](https://oi.flyimg.io/upload/w_300,h_250/https://m0.cl/t/resize-test_1920.jpg)
+![lago_ranco](https://oi.flyimg.io/upload/w_300,h_250/http://medula.cl/t/resize-test_1920.jpg)
 
 ## Crop to a square and rotate 90 degrees clockwise
-* Image: `https://m0.cl/t/resize-test_1920.jpg` 
+* Image: `http://medula.cl/t/resize-test_1920.jpg` 
 * Width: 200
 * Height: 200
 * Crop: `c_1`
 * Rotate: 90
 
-https://oi.flyimg.io/upload/w_200,h_200,c_1,r_90/https://m0.cl/t/resize-test_1920.jpg
+https://oi.flyimg.io/upload/w_200,h_200,c_1,r_90/http://medula.cl/t/resize-test_1920.jpg
 
-![lago_ranco](https://oi.flyimg.io/upload/w_200,h_200,c_1,r_90/https://m0.cl/t/resize-test_1920.jpg)
+![lago_ranco](https://oi.flyimg.io/upload/w_200,h_200,c_1,r_90/http://medula.cl/t/resize-test_1920.jpg)
 
 ## Get an image with exact dimensions and low quality
-* Image: `https://m0.cl/t/resize-test_1920.jpg` 
+* Image: `http://medula.cl/t/resize-test_1920.jpg` 
 * Width: 200
 * Height: 200
 * Crop: `c_1`
 * Quality: 30
 
-https://oi.flyimg.io/upload/w_200,h_200,c_1,q_30/https://m0.cl/t/resize-test_1920.jpg
+https://oi.flyimg.io/upload/w_200,h_200,c_1,q_30/http://medula.cl/t/resize-test_1920.jpg
 
-![lago_ranco](https://oi.flyimg.io/upload/w_200,h_200,c_1,q_30/https://m0.cl/t/resize-test_1920.jpg)
+![lago_ranco](https://oi.flyimg.io/upload/w_200,h_200,c_1,q_30/http://medula.cl/t/resize-test_1920.jpg)
 
 
 # Table of Contents
@@ -106,9 +106,11 @@ https://oi.flyimg.io/upload/w_200,h_200,c_1,q_30/https://m0.cl/t/resize-test_192
    * [Demo Application running](#demo-application-running)
    * [Roadmap](#roadmap)
    * [Community](#community)
+   * [Supporters](#supporters)
    * [Contributors](#contributors)
    * [Backers](#backers)
    * [Sponsors](#sponsors)
+   * [License](#license)
    
    
 # Requirements
@@ -157,6 +159,14 @@ docker build -t flyimg .
 ```
 This will download and build the main image, It will take a few minutes. If you get some sort of error related to files not found by apt-get or similar, try this same command again.
 
+**IMPORTANT!** If you cloned the project, only for the first time, you need to run `composer install` **inside** the container:
+
+```sh
+docker exec -it flyimg composer install
+```
+
+Again, it will take a few minutes to download the dependencies. Same as before, if you get some errors you should try running `composer install` again.
+
 Then run the container:
 
 ```sh
@@ -170,14 +180,6 @@ docker run -itd -p 8080:80 -v $PWD:/var/www/html --name flyimg flyimg
 ```
 
 The above command will make the Dockerfile run supervisord command which launches 2 processes: **nginx** and **php-fpm** and starts listening on port 8080.
-
-**IMPORTANT!** If you cloned the project, only for the first time, you need to run `composer install` **inside** the container:
-
-```sh
-docker exec -it flyimg composer install
-```
-
-Again, it will take a few minutes to download the dependencies. Same as before, if you get some errors you should try running `composer install` again.
  
 
 # Testing Flyimg service
@@ -321,7 +323,7 @@ Than any request to Fyimg app will throw an error unless it's encrypted.
 To generate the encrypted url you need to run this command:
 
 ```sh
-docker exec flyimg php app.php encrypt w_200,h_200,c_1/https://m0.cl/t/resize-test_1920.jpg
+docker exec flyimg php app.php encrypt w_200,h_200,c_1/http://medula.cl/t/resize-test_1920.jpg
 ```
 
 it'll return something like this:
@@ -414,7 +416,7 @@ Status Codes  [code:count]             200:500
 
 [https://oi.flyimg.io](https://oi.flyimg.io)
 
-![resize-test](https://oi.flyimg.io/upload/w_300,h_250,c_1/https://m0.cl/t/resize-test_1920.jpg)
+![resize-test](https://oi.flyimg.io/upload/w_300,h_250,c_1/http://medula.cl/t/resize-test_1920.jpg)
 
 
 # Roadmap
@@ -430,6 +432,12 @@ Status Codes  [code:count]             200:500
 # Community
 
 * Follow us on [GitHub][1] and [Twitter][2].
+
+# Supporters
+
+A special thanks to JetBrains for supporting our project with their [open source license program](https://www.jetbrains.com/buy/opensource/).
+
+![Jetbrains](https://oi.flyimg.io/upload/w_300/jetbrains-variant-3.png)
 
 
 # Contributors
@@ -462,7 +470,9 @@ Thank you to all our sponsors! (please ask your company to also support this ope
 
 
 
-Licence: MIT
+# License
+
+The MIT License (MIT). Please see [License File](LICENSE) for more information.
 
 
 Enjoy your Flyimaging!
