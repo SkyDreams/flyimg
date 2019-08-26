@@ -23,7 +23,7 @@ whitelist_domains:
     - domain-1.com
     - domain-2.com
 
-#Default storage system is local, to use use AWS S3, change this param to s3
+# Default storage system is local, to use use AWS S3, change this param to s3
 storage_system: skydreams
 
 skydreams:
@@ -80,7 +80,7 @@ options_keys:
 default_options:
   mozjpeg: 0 # keep it like this for extract
   quality: 90
-  output: auto
+  output: input
   unsharp: null
   sharpen: null
   blur: null

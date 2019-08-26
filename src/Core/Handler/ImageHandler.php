@@ -4,8 +4,8 @@ namespace Core\Handler;
 
 use Core\Entity\AppParameters;
 use Core\Entity\Image\InputImage;
-use Core\Entity\OptionsBag;
 use Core\Entity\Image\OutputImage;
+use Core\Entity\OptionsBag;
 use Core\Processor\ExtractProcessor;
 use Core\Processor\FaceDetectProcessor;
 use Core\Processor\ImageProcessor;
@@ -164,8 +164,8 @@ class ImageHandler
      */
     protected function extractProcess(OutputImage $outputImage): void
     {
-        $topLeftX = $outputImage->extractKey('extract-top-x');
-        $topLeftY = $outputImage->extractKey('extract-top-y');
+        $topLeftX     = $outputImage->extractKey('extract-top-x');
+        $topLeftY     = $outputImage->extractKey('extract-top-y');
         $bottomRightX = $outputImage->extractKey('extract-bottom-x');
         $bottomRightY = $outputImage->extractKey('extract-bottom-y');
 

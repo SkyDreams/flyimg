@@ -52,5 +52,11 @@
     "psr-4": {
       "Tests\\": "tests/"
     }
-  }
+  },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "git@github.com:SkyDreams/flyimg.git"
+    }
+  ]
 }
