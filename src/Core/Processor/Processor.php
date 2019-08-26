@@ -2,12 +2,13 @@
 
 namespace Core\Processor;
 
-use Core\Entity\OutputImage;
+use Core\Entity\Command;
+use Core\Entity\Image\OutputImage;
 use Core\Exception\ExecFailedException;
 
 /**
  * Class Processor
- * @package Core\Service
+ * @package Core\Processor
  */
 class Processor
 {
@@ -29,14 +30,14 @@ class Processor
     const EXCLUDED_IM_OPTIONS = ['quality', 'mozjpeg', 'refresh', 'webp-lossless'];
 
     /**
-     * @param string $commandStr
+     * @param Command $command
      *
      * @return array
      * @throws \Exception
      */
-    public function execute(string $commandStr): array
+    public function execute(Command $command): array
     {
-        exec($commandStr, $output, $code);
+        exec($command, $output, $code);
         if (count($output) === 0) {
             $outputError = $code;
         } else {
@@ -47,7 +48,7 @@ class Processor
             throw new ExecFailedException(
                 "Command failed. The exit code: ".
                 $outputError."<br>The last line of output: ".
-                $commandStr
+                $command
             );
         }
 
@@ -61,9 +62,11 @@ class Processor
      *
      * @return string
      */
-    public function getImageIdentity(OutputImage $image): string
+    public function imageIdentityInformation(OutputImage $image): string
     {
-        $output = $this->execute(self::IM_IDENTITY_COMMAND." ".$image->getOutputImagePath());
+        $identityCmd = new Command(self::IM_IDENTITY_COMMAND);
+        $identityCmd->addArgument($image->getOutputImagePath());
+        $output = $this->execute($identityCmd);
 
         return !empty($output[0]) ? $output[0] : "";
     }

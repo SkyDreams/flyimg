@@ -2,7 +2,7 @@
 
 namespace Core\Controller;
 
-use Symfony\Component\HttpFoundation\Response;
+use Core\Entity\Response;
 
 class DefaultController extends CoreController
 {
@@ -19,12 +19,15 @@ class DefaultController extends CoreController
      * @param string $imageSrc
      *
      * @return Response
+     * @throws \Exception
      */
     public function uploadAction(string $options, string $imageSrc = null): Response
     {
-        $image = $this->getImageHandler()->processImage($options, $imageSrc);
+        $image = $this->imageHandler()->processImage($options, $imageSrc);
 
-        return $this->generateImageResponse($image);
+        $this->response->generateImageResponse($image);
+
+        return $this->response;
     }
 
     /**
@@ -32,11 +35,14 @@ class DefaultController extends CoreController
      * @param string $imageSrc
      *
      * @return Response
+     * @throws \Exception
      */
     public function pathAction(string $options, string $imageSrc = null): Response
     {
-        $image = $this->getImageHandler()->processImage($options, $imageSrc);
+        $image = $this->imageHandler()->processImage($options, $imageSrc);
 
-        return $this->generatePathResponse($image);
+        $this->response->generatePathResponse($image);
+
+        return $this->response;
     }
 }

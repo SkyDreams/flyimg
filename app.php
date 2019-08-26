@@ -2,13 +2,17 @@
 
 require_once __DIR__.'/vendor/autoload.php';
 
+use Symfony\Component\Debug\ErrorHandler;
 use Symfony\Component\Debug\ExceptionHandler;
 use Symfony\Component\Routing\RouteCollection;
 
 $app = new Silex\Application();
 
-$app['env'] = $_ENV['env'] ?: 'dev';
+/** @var \Core\Entity\AppParameters $app['params'] */
+$app['params'] = new \Core\Entity\AppParameters(__DIR__.'/config/parameters.yml');
 
+
+$app['env'] = $_ENV['env'] ?: 'dev';
 $exceptionHandlerFunction = function (\Exception $e) {
     $out = fopen('php://stdout', 'w');
     fputs(
@@ -18,7 +22,8 @@ $exceptionHandlerFunction = function (\Exception $e) {
     fclose($out);
 };
 
-$exceptionHandler = ExceptionHandler::register(false);
+ErrorHandler::register();
+$exceptionHandler = ExceptionHandler::register($app['params']->parameterByKey('debug'));
 $exceptionHandler->setHandler($exceptionHandlerFunction);
 
 if ('test' !== $app['env']) {
@@ -51,14 +56,9 @@ $app['routes'] = $app->extend(
     }
 );
 
-/**
- * Application parameters
- */
-$app['params'] = yaml_parse(file_get_contents(__DIR__.'/config/parameters.yml'));
-
 /** Register Storage provider */
 
-switch ($app['params']['storage_system']) {
+switch ($app['params']->parameterByKey('storage_system')) {
     case 's3':
         $app->register(new \Core\StorageProvider\S3StorageProvider());
         break;
@@ -96,6 +96,16 @@ $app['image.handler'] = function (\Silex\Application $app) {
     );
 };
 
+/**
+ * To generate a hashed url when security key is enabled
+ * Example usage: php app.php encrypt w_200,h_200,c_1/Rovinj-Croatia.jpg
+ */
+if (!empty($argv[1]) && !empty($argv[2]) && $argv[1] == 'encrypt') {
+    printf("Hashed request: %s\n", $app['image.handler']->securityHandler()->encrypt($argv[2]));
+    return;
+}
+
 /** debug conf */
-$app['debug'] = $app['params']['debug'];
+$app['debug'] = $app['params']->parameterByKey('debug');
+
 return $app;

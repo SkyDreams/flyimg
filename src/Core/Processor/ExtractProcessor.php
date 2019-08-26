@@ -2,11 +2,12 @@
 
 namespace Core\Processor;
 
-use Core\Entity\InputImage;
+use Core\Entity\Command;
+use Core\Entity\Image\InputImage;
 
 /**
  * Class ExtractProcessor
- * @package Core\Service
+ * @package Core\Processor
  */
 class ExtractProcessor extends Processor
 {
@@ -18,6 +19,8 @@ class ExtractProcessor extends Processor
      * @param int        $topLeftY
      * @param int        $bottomRightX
      * @param int        $bottomRightY
+     *
+     * @throws \Exception
      */
     public function extract(InputImage $inputImage, int $topLeftX, int $topLeftY, int $bottomRightX, int $bottomRightY)
     {
@@ -27,11 +30,10 @@ class ExtractProcessor extends Processor
 
         $geometryW = $bottomRightX - $topLeftX;
         $geometryH = $bottomRightY - $topLeftY;
-
-        $cropCmdStr =
-            self::IM_CONVERT_COMMAND.
-            " '{$inputImage->getSourceImagePath()}' -crop '{$geometryW}'x'{$geometryH}'+'{$topLeftX}'+'{$topLeftY}' ".
-            $inputImage->getSourceImagePath();
-        $this->execute($cropCmdStr);
+        $extractCmd = new Command(self::IM_CONVERT_COMMAND);
+        $extractCmd->addArgument($inputImage->sourceImagePath());
+        $extractCmd->addArgument(" -crop", "{$geometryW}x{$geometryH}+{$topLeftX}+{$topLeftY}");
+        $extractCmd->addArgument($inputImage->sourceImagePath());
+        $this->execute($extractCmd);
     }
 }

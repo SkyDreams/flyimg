@@ -2,10 +2,10 @@
 
 namespace Core\Controller;
 
-use Core\Entity\OutputImage;
+use Core\Entity\Response;
 use Core\Handler\ImageHandler;
 use Silex\Application;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 
 class CoreController
 {
@@ -15,17 +15,27 @@ class CoreController
     protected $app;
 
     /**
+     * @var Response
+     */
+    protected $response;
+
+    /**
      * @param Application $app
      */
-    public function setApp(Application $app)
+    public function application(Application $app)
     {
         $this->app = $app;
+        $this->response = new  Response(
+            $this->app['image.handler'],
+            $this->app['flysystems']['file_path_resolver'],
+            $this->app['params']->parameterByKey('header_cache_days')
+        );
     }
 
     /**
      * @return ImageHandler
      */
-    public function getImageHandler(): ImageHandler
+    public function imageHandler(): ImageHandler
     {
         return $this->app['image.handler'];
     }
@@ -37,73 +47,19 @@ class CoreController
      */
     public function render(string $templateName): Response
     {
+        $templateFullPath = ROOT_DIR.'/src/Core/Views/'.$templateName.'.php';
+
+        if (!file_exists($templateFullPath)) {
+            throw new FileNotFoundException('Template file note exist: '.$templateFullPath);
+        }
+
         ob_start();
-        include(ROOT_DIR.'/src/Core/Views/'.$templateName.'.php');
+        include($templateFullPath);
         $body = ob_get_contents();
         ob_end_clean();
 
-        return new Response($body);
-    }
+        $this->response->setContent($body);
 
-    /**
-     * @param OutputImage $image
-     *
-     * @return Response
-     */
-    public function generateImageResponse(OutputImage $image): Response
-    {
-        $response = new Response();
-        $response->setContent($image->getOutputImageContent());
-        $response = $this->setHeadersContent($image, $response);
-        $image->removeOutputImage();
-
-        return $response;
-    }
-
-    /**
-     * @param OutputImage $image
-     *
-     * @return Response
-     */
-    public function generatePathResponse(OutputImage $image): Response
-    {
-        $response = new Response();
-        $imagePath = $image->getOutputImageName();
-        $imagePath = sprintf($this->app['flysystems']['file_path_resolver'], $imagePath);
-        $response->setContent($imagePath);
-        $image->removeOutputImage();
-
-        return $response;
-    }
-
-    /**
-     * @param OutputImage $image
-     * @param Response    $response
-     *
-     * @return Response
-     */
-    protected function setHeadersContent(OutputImage $image, Response $response): Response
-    {
-        $imageHandler = $this->getImageHandler();
-        $response->headers->set('Content-Type', $imageHandler->getResponseContentType($image));
-
-        $expireDate = new \DateTime();
-        $expireDate->add(new \DateInterval('P1Y'));
-        $response->setExpires($expireDate);
-        $longCacheTime = 3600 * 24 * ((int)$this->app['params']['header_cache_days']);
-
-        $response->setMaxAge($longCacheTime);
-        $response->setSharedMaxAge($longCacheTime);
-        $response->setPublic();
-
-        if ($image->getInputImage()->getOptions()['refresh']) {
-            $response->headers->set('Cache-Control', 'no-cache, private');
-            $response->setExpires(null)->expire();
-
-            $response->headers->set('im-identify', $imageHandler->getImageProcessor()->getImageIdentity($image));
-            $response->headers->set('im-command', $image->getCommandString());
-        }
-
-        return $response;
+        return $this->response;
     }
 }

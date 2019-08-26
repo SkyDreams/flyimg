@@ -9,10 +9,16 @@ header_cache_days: 365
 #options separator
 options_separator: ","
 
-#restrict domains, false by default
+#Security: Signature generation
+# security key
+security_key: ""
+# secret Initialization vector(IV)
+security_iv: ""
+
+# restrict domains, false by default
 restricted_domains: false
 
-#if restricted_domains is enabled, put whitelist domains here
+# if restricted_domains is enabled, put whitelist domains here
 whitelist_domains:
     - domain-1.com
     - domain-2.com
@@ -23,6 +29,9 @@ storage_system: skydreams
 skydreams:
   host: 'http://storage_nginx/'
 
+# Number of threads for Imagemagick to use
+thread: 1
+
 #In case storage_system: s3, you need to add those AWS S3 parameters:
 aws_s3:
   access_id: ""
@@ -30,12 +39,17 @@ aws_s3:
   region: ""
   bucket_name: ""
 
+#Extra options for the header sent to source image server, as some servers requires the User-Agent.
+header_extra_options: 'User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; rv:2.2) Gecko/20110201'
+
 #Keys used in url to match options. Ex: q_80,w_200,h_100
 options_keys:
   moz: mozjpeg
   q: quality
   o: output
   unsh: unsharp
+  sh: sharpen
+  blr: blur
   fc: face-crop
   fcp: face-crop-position
   fb: face-blur
@@ -68,6 +82,8 @@ default_options:
   quality: 90
   output: auto
   unsharp: null
+  sharpen: null
+  blur: null
   face-crop: 0
   face-crop-position: 0
   face-blur: 0
@@ -87,11 +103,9 @@ default_options:
   preserve-aspect-ratio: 0 # must be turned off to use with extract
   preserve-natural-size: 0 # must be turned off to use with extract
   webp-lossless: 0
-  gif-frame: 0,
+  gif-frame: 0
   extract: null
   extract-top-x: null
   extract-top-y: null
   extract-bottom-x: null
   extract-bottom-y: null
-  # private options set here
-  thread: 1

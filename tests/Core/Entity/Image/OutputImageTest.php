@@ -1,10 +1,10 @@
 <?php
 
-namespace Tests\Core\Entity;
+namespace Tests\Core\Entity\Image;
 
-use Core\Entity\InputImage;
-use Core\Entity\OutputImage;
-use Core\Exception\ReadFileException;
+use Core\Entity\Image\InputImage;
+use Core\Entity\Image\OutputImage;
+use Core\Entity\OptionsBag;
 use Tests\Core\BaseTest;
 
 /**
@@ -17,11 +17,17 @@ class OutputImageTest extends BaseTest
      */
     public function testParseOptions()
     {
+        /**
+         * This array needs to be updated every time we
+         * add or remove a URL option in the config/parametesr.yml file.
+         */
         $expectedParseArray = [
             'mozjpeg' => 1,
             'quality' => 90,
             'output' => 'auto',
             'unsharp' => '0.25x0.25+8+0.065',
+            'sharpen' => null,
+            'blur' => null,
             'width' => '200',
             'height' => '100',
             'face-crop' => 0,
@@ -42,12 +48,16 @@ class OutputImageTest extends BaseTest
             'preserve-natural-size' => 1,
             'webp-lossless' => 0,
             'gif-frame' => 0,
-            'thread' => 1,
+            'extract' => null,
+            'extract-top-x' => null,
+            'extract-top-y' => null,
+            'extract-bottom-x' => null,
+            'extract-bottom-y' => null,
         ];
-        $parsedOptions = $this->ImageHandler->parseOptions(self::OPTION_URL);
-        $inputImage = new InputImage($parsedOptions, self::JPG_TEST_IMAGE);
+        $optionsBag = new OptionsBag($this->imageHandler->appParameters(), self::OPTION_URL);
+        $inputImage = new InputImage($optionsBag, self::JPG_TEST_IMAGE);
 
-        $this->assertEquals($inputImage->getOptions(), $expectedParseArray);
+        $this->assertEquals($inputImage->optionsBag()->asArray(), $expectedParseArray);
     }
 
     /**
@@ -55,12 +65,12 @@ class OutputImageTest extends BaseTest
      */
     public function testSaveToTemporaryFile()
     {
-        $parsedOptions = $this->ImageHandler->parseOptions(self::OPTION_URL);
-        $inputImage = new InputImage($parsedOptions, self::JPG_TEST_IMAGE);
+        $optionsBag = new OptionsBag($this->imageHandler->appParameters(), self::OPTION_URL);
+        $inputImage = new InputImage($optionsBag, self::JPG_TEST_IMAGE);
         $image = new OutputImage($inputImage);
         $this->generatedImage[] = $image;
 
-        $this->assertFileExists($image->getInputImage()->getSourceImagePath());
+        $this->assertFileExists($image->getInputImage()->sourceImagePath());
     }
 
     /**
@@ -68,13 +78,13 @@ class OutputImageTest extends BaseTest
      */
     public function testGenerateFilesName()
     {
-        $parsedOptions = $this->ImageHandler->parseOptions(self::OPTION_URL);
-        $inputImage = new InputImage($parsedOptions, self::JPG_TEST_IMAGE);
+        $optionsBag = new OptionsBag($this->imageHandler->appParameters(), self::OPTION_URL);
+        $inputImage = new InputImage($optionsBag, self::JPG_TEST_IMAGE);
         $image = new OutputImage($inputImage);
-        $parsedOptions = $this->ImageHandler->parseOptions(self::OPTION_URL);
 
-        $inputImage = new InputImage($parsedOptions, self::JPG_TEST_IMAGE);
-        $image2 = new OutputImage($inputImage);
+        $optionsBag2 = new OptionsBag($this->imageHandler->appParameters(), self::OPTION_URL);
+        $inputImage2 = new InputImage($optionsBag2, self::JPG_TEST_IMAGE);
+        $image2 = new OutputImage($inputImage2);
 
         $this->generatedImage[] = $image2;
         $this->generatedImage[] = $image;
@@ -88,12 +98,12 @@ class OutputImageTest extends BaseTest
      */
     public function testExtractByKey()
     {
-        $parsedOptions = $this->ImageHandler->parseOptions(self::OPTION_URL);
-        $inputImage = new InputImage($parsedOptions, self::JPG_TEST_IMAGE);
+        $optionsBag = new OptionsBag($this->imageHandler->appParameters(), self::OPTION_URL);
+        $inputImage = new InputImage($optionsBag, self::JPG_TEST_IMAGE);
         $image = new OutputImage($inputImage);
 
-        $image->extract('width');
+        $image->extractKey('width');
         $this->generatedImage[] = $image;
-        $this->assertFalse(array_key_exists('width', $image->getInputImage()->getOptions()));
+        $this->assertFalse(array_key_exists('width', $image->getInputImage()->optionsBag()->asArray()));
     }
 }
