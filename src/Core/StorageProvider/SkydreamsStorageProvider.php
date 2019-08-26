@@ -2,6 +2,7 @@
 
 namespace Core\StorageProvider;
 
+use Adapter\SkyDreamsAdapter;
 use Aws\S3\S3Client;
 use Core\Exception\MissingParamsException;
 use GuzzleHttp\Client;
@@ -25,7 +26,7 @@ class SkydreamsStorageProvider implements ServiceProviderInterface
      */
     public function register(Container $app)
     {
-        $params = $app['params']['skydreams'];
+        $params = $app['params']->parameterByKey('skydreams');
 
         $skyDreamsClient = new Client([
             'base_uri' => $params['host']
@@ -36,7 +37,7 @@ class SkydreamsStorageProvider implements ServiceProviderInterface
             [
                 'flysystem.filesystems' => [
                     'upload_dir' => [
-                        'adapter' => 'Adapter\SkyDreamsAdapter',
+                        'adapter' => SkyDreamsAdapter::class,
                         'args' => [
                             $skyDreamsClient,
                             'flyimg'
