@@ -2,7 +2,7 @@
 
 namespace Core\StorageProvider;
 
-use Adapter\SkyDreamsAdapter;
+use Core\Adapter\SkyDreamsAdapter;
 use Core\Exception\MissingParamsException;
 use GuzzleHttp\Client;
 use Pimple\Container;
@@ -45,6 +45,10 @@ class SkydreamsStorageProvider implements ServiceProviderInterface
                 ],
             ]
         );
+
+        $app['flysystems']['file_path_resolver'] = function () {
+            return 'NOT_YET_IMPLEMENTED'; // TODO this might prove difficult for a flexible solution but is unused for now
+        };
 
         return;
     }

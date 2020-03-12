@@ -1,6 +1,6 @@
 <?php
 
-namespace Adapter;
+namespace Core\Adapter;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
