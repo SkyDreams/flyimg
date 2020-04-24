@@ -80,9 +80,9 @@ options_keys:
 
 #Default options values
 default_options:
-  mozjpeg: 0
+  mozjpeg: 0 # keep it like this for extract
   quality: 90
-  output: auto
+  output: input
   unsharp: null
   sharpen: null
   blur: null
@@ -95,15 +95,15 @@ default_options:
   background: null
   strip: 1
   resize: null
-  gravity: NorthWest
+  gravity: NorthWest # keep it like this for extract
   filter: Lanczos
   rotate: null
   scale: null
   sampling-factor: 1x1
   refresh: false
   extent: null
-  preserve-aspect-ratio: 1
-  preserve-natural-size: 1
+  preserve-aspect-ratio: 0 # must be turned off to use with extract
+  preserve-natural-size: 0 # must be turned off to use with extract
   webp-lossless: 0
   gif-frame: 0
   extract: null
