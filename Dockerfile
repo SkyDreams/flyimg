@@ -1,5 +1,7 @@
 FROM flyimg/base-image:1.1.0
 
+ENV TZ=Europe/Amsterdam
+
 # Install other file processors.
 RUN apt-get update
 RUN apt-get install -y ghostscript ffmpeg
