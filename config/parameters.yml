@@ -1,7 +1,7 @@
 application_name: Flyimg.io
 
 #debug
-debug: true
+debug: false
 
 #Number of days for header cache expires `max_age`
 header_cache_days: 365
@@ -24,7 +24,10 @@ whitelist_domains:
     - domain-2.com
 
 # Default storage system is local, to use use AWS S3, change this param to s3
-storage_system: local
+storage_system: skydreams
+
+skydreams:
+  host: 'http://storage_nginx/'
 
 # Number of threads for Imagemagick to use
 thread: 1
@@ -77,9 +80,9 @@ options_keys:
 
 #Default options values
 default_options:
-  mozjpeg: 1
+  mozjpeg: 0 # keep it like this for extract
   quality: 90
-  output: auto
+  output: input
   unsharp: null
   sharpen: null
   blur: null
@@ -92,15 +95,15 @@ default_options:
   background: null
   strip: 1
   resize: null
-  gravity: Center
+  gravity: NorthWest # keep it like this for extract
   filter: Lanczos
   rotate: null
   scale: null
   sampling-factor: 1x1
   refresh: false
   extent: null
-  preserve-aspect-ratio: 1
-  preserve-natural-size: 1
+  preserve-aspect-ratio: 0 # must be turned off to use with extract
+  preserve-natural-size: 0 # must be turned off to use with extract
   webp-lossless: 0
   gif-frame: 0
   extract: null

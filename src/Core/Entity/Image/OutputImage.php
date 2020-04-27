@@ -40,6 +40,8 @@ class OutputImage
     /** @var array list of the supported output extensions */
     protected $allowedOutExtensions = [self::EXT_PNG, self::EXT_JPG, self::EXT_GIF, self::EXT_WEBP];
 
+    protected $hasCommandsExecuted = false;
+
     /**
      * OutputImage constructor.
      *
@@ -127,6 +129,16 @@ class OutputImage
     public function getCommandString(): string
     {
         return $this->commandString;
+    }
+
+    public function hasCommandsExecuted(): bool
+    {
+        return $this->hasCommandsExecuted;
+    }
+
+    public function setHasCommandsExecuted(bool $hasCommandsExecuted)
+    {
+        $this->hasCommandsExecuted = $hasCommandsExecuted;
     }
 
     /**
@@ -264,6 +276,7 @@ class OutputImage
      */
     public function isWebPBrowserSupported(): bool
     {
-        return in_array(InputImage::WEBP_MIME_TYPE, Request::createFromGlobals()->getAcceptableContentTypes());
+        return false; // We don't support webP right now because it is complicated with caching and cropping
+        //        return in_array(self::WEBP_MIME_TYPE, Request::createFromGlobals()->getAcceptableContentTypes());
     }
 }

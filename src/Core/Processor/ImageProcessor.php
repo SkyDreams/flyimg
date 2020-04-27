@@ -161,6 +161,10 @@ class ImageProcessor extends Processor
     {
         $tmpFileName = $this->sourceImageInfo->path();
 
+        if ($outputImage->hasCommandsExecuted()) {
+            $tmpFileName = $outputImage->getOutputImagePath();
+        }
+
         //Check the source image is gif
         if ($outputImage->getInputImage()->isInputGif()) {
             $frame = $this->options->getOption('gif-frame');
